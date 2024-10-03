@@ -1,4 +1,3 @@
-
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -15,6 +14,9 @@ namespace OneStream.Api
 
             // Add services to the container.
 
+            var jwtSecret = builder.Configuration["Authentication:JWT_Secret"];
+            var key = Encoding.UTF8.GetBytes(jwtSecret);
+
             builder.Services
                 .AddAuthentication(p =>
                 {
@@ -29,9 +31,7 @@ namespace OneStream.Api
                     p.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JWT_Secret"])
-                        ),
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
                         ValidateIssuer = false,
                         ValidateAudience = false,
                         ClockSkew = TimeSpan.Zero
@@ -55,6 +55,8 @@ namespace OneStream.Api
             }
 
             app.UseHttpsRedirection();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
             

@@ -64,6 +64,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Other Package References">
+    <PackageVersion Include="Flurl.Http" Version="4.0.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 </Project>
