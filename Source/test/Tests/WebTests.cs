@@ -1,3 +1,7 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using OneStream.Api.Controllers;
+
 namespace OneStream.Tests
 {
     public class WebTests
@@ -24,6 +28,27 @@ namespace OneStream.Tests
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public void GetWeatherVerifyTemperatureRange()
+        {
+            // Arrange
+            var logger = new Logger<WeatherForecastController>(new NullLoggerFactory());
+            var controller = new WeatherForecastController(logger);
+            var range = Enumerable.Range(-20, 76);
+
+            // Act
+            var result = controller.Get();
+
+            // Assert
+            Assert.Collection(result,
+                p => Assert.True(range.Contains(p.TemperatureC)),
+                p => Assert.True(range.Contains(p.TemperatureC)),
+                p => Assert.True(range.Contains(p.TemperatureC)),
+                p => Assert.True(range.Contains(p.TemperatureC)),
+                p => Assert.True(range.Contains(p.TemperatureC))
+            );
         }
     }
 }
