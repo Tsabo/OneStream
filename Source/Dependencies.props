@@ -1,0 +1,47 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Default TFMs to use when building and packaging -->
+  <PropertyGroup>
+    <!-- TFM used when coding in Visual Studio and when creating templates -->
+    <DefaultTargetFramework>net8.0</DefaultTargetFramework>
+
+    <!-- TFMs used to build the abstractions and modules-->
+    <CommonTargetFrameworks Condition="'$(CommonTargetFrameworks)' == ''">net8.0</CommonTargetFrameworks>
+  </PropertyGroup>
+
+  <!-- Detect if the solution is opened in VS to limit the TFMs that are analyzed by Roslyn for performance reasons -->
+  <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(BuildingByReSharper)' == 'true'">
+    <CommonTargetFrameworks>$(DefaultTargetFramework)</CommonTargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <UserSecretsId>OneStream</UserSecretsId>
+    <TargetFramework>$(CommonTargetFrameworks)</TargetFramework>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectCapability Include="DynamicDependentFile" />
+    <ProjectCapability Include="DynamicFileNesting" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <NoWarn>
+      CS1591, <!--  Warning CS1591: Missing XML comment for publicly visible type or member -->
+      CS0169  <!--  Warning CS0169: The field '...' is never used [ Public API that some types aren't apparent because it is serialized via JSON ] -->
+    </NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <WarningsAsErrors>612,618</WarningsAsErrors>
+    <!--  Warning : Type or member is obsolete -->
+  </PropertyGroup>
+
+</Project>
