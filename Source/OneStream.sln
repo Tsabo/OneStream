@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35309.182
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "src\Backend\Backend.csproj", "{431CE566-3471-48B6-AAF4-8996614F09BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend", "src\Backend\Backend.csproj", "{431CE566-3471-48B6-AAF4-8996614F09BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "src\Client\Client.csproj", "{9C39774A-5A22-47B0-9FED-CB309D7DF657}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "src\Client\Client.csproj", "{9C39774A-5A22-47B0-9FED-CB309D7DF657}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{049AD55F-1E83-4AAD-BB44-119B1372A6DC}"
 EndProject
@@ -20,13 +20,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NuGet.config = NuGet.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "src\Api\Api.csproj", "{DD391A94-DDB6-4326-B777-2E31640D4B66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "src\Api\Api.csproj", "{DD391A94-DDB6-4326-B777-2E31640D4B66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppHost", "src\AppHost\AppHost.csproj", "{B187140F-51E7-4B6C-AB8D-A03011CAD388}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppHost", "src\AppHost\AppHost.csproj", "{B187140F-51E7-4B6C-AB8D-A03011CAD388}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceDefaults", "src\ServiceDefaults\ServiceDefaults.csproj", "{62F3049E-B24F-431C-9E54-C889C1CF2EA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceDefaults", "src\ServiceDefaults\ServiceDefaults.csproj", "{62F3049E-B24F-431C-9E54-C889C1CF2EA3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{E32BE575-A0AB-47C5-9410-AA2AA1428787}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{88DC36C6-C390-4067-B89A-E0D73BF2E34E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "test\Tests\Tests.csproj", "{8DF89803-53CE-4656-A1AF-6F53B54E1D5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +58,10 @@ Global
 		{62F3049E-B24F-431C-9E54-C889C1CF2EA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62F3049E-B24F-431C-9E54-C889C1CF2EA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62F3049E-B24F-431C-9E54-C889C1CF2EA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DF89803-53CE-4656-A1AF-6F53B54E1D5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DF89803-53CE-4656-A1AF-6F53B54E1D5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DF89803-53CE-4656-A1AF-6F53B54E1D5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DF89803-53CE-4656-A1AF-6F53B54E1D5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,6 +73,7 @@ Global
 		{B187140F-51E7-4B6C-AB8D-A03011CAD388} = {E32BE575-A0AB-47C5-9410-AA2AA1428787}
 		{62F3049E-B24F-431C-9E54-C889C1CF2EA3} = {E32BE575-A0AB-47C5-9410-AA2AA1428787}
 		{E32BE575-A0AB-47C5-9410-AA2AA1428787} = {049AD55F-1E83-4AAD-BB44-119B1372A6DC}
+		{8DF89803-53CE-4656-A1AF-6F53B54E1D5F} = {88DC36C6-C390-4067-B89A-E0D73BF2E34E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {25D4B6C6-66AC-40EE-B86D-AA69998A267B}
