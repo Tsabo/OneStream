@@ -1,5 +1,7 @@
 # OneStream Candidate Assessment
 
+![architecture](https://github.com/user-attachments/assets/1320e782-2548-4dbc-96d4-100ab1a27a01)
+
 ## Prerequisites 
 
 This project uses .NET Aspire. To work with .NET Aspire, you'll need the following installed locally:
@@ -47,5 +49,3 @@ dotnet run --project ./Source/src/AppHost
 Visual Studio launches both your app and the .NET Aspire dashboard for you automatically in your browser. If you start the app using the .NET CLI, copy and paste the dashboard URL from the output into your browser, or hold Ctrl and select the link (if your terminal supports hyperlinks).
 
 ![A screenshot showing how to launch the dashboard using the CLI.](https://github.com/user-attachments/assets/561d7add-c483-4eaa-99b5-fc42c9f22b40)
-
-## Infrastructure
