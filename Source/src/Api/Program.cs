@@ -1,6 +1,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using OneStream.Api.Data;
+using OneStream.Api.Services;
+using OneStream.Api.Services.Abstractions;
 
 namespace OneStream.Api
 {
@@ -10,10 +13,11 @@ namespace OneStream.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.AddSqlServerDbContext<ApplicationDbContext>("OneStream");
             builder.AddServiceDefaults();
 
             // Add services to the container.
-
+            
             var jwtSecret = builder.Configuration["Authentication:JWT_Secret"];
             var key = Encoding.UTF8.GetBytes(jwtSecret);
 
@@ -45,6 +49,18 @@ namespace OneStream.Api
 
             builder.Services.AddAntiforgery();
 
+            builder.Services.AddScoped<IPeopleRepo, PeopleRepo>();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyHeader();
+                    policy.AllowAnyMethod();
+                    policy.AllowAnyOrigin();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -53,6 +69,8 @@ namespace OneStream.Api
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors();
 
             app.UseHttpsRedirection();
 

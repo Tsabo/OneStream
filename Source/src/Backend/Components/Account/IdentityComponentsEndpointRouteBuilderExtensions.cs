@@ -1,4 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Microsoft.IdentityModel.Tokens;
 using OneStream.Backend.Components.Account.Pages;
 using OneStream.Backend.Components.Account.Pages.Manage;
 using OneStream.Backend.Data;
@@ -21,15 +24,16 @@ namespace OneStream.Backend.Components.Account
 
             var accountGroup = endpoints.MapGroup("/Account");
 
-            accountGroup.MapPost("/PerformExternalLogin", (
-                HttpContext context,
+            accountGroup.MapPost("/PerformExternalLogin", (HttpContext context,
                 [FromServices] SignInManager<ApplicationUser> signInManager,
                 [FromForm] string provider,
                 [FromForm] string returnUrl) =>
             {
-                IEnumerable<KeyValuePair<string, StringValues>> query = [
+                IEnumerable<KeyValuePair<string, StringValues>> query =
+                [
                     new("ReturnUrl", returnUrl),
-                    new("Action", ExternalLogin.LoginCallbackAction)];
+                    new("Action", ExternalLogin.LoginCallbackAction)
+                ];
 
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
@@ -37,22 +41,22 @@ namespace OneStream.Backend.Components.Account
                     QueryString.Create(query));
 
                 var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+
                 return TypedResults.Challenge(properties, [provider]);
             });
 
-            accountGroup.MapPost("/Logout", async (
-                ClaimsPrincipal user,
+            accountGroup.MapPost("/Logout", async (ClaimsPrincipal user,
                 SignInManager<ApplicationUser> signInManager,
                 [FromForm] string returnUrl) =>
             {
                 await signInManager.SignOutAsync();
+
                 return TypedResults.LocalRedirect($"~/{returnUrl}");
             });
 
             var manageGroup = accountGroup.MapGroup("/Manage").RequireAuthorization();
 
-            manageGroup.MapPost("/LinkExternalLogin", async (
-                HttpContext context,
+            manageGroup.MapPost("/LinkExternalLogin", async (HttpContext context,
                 [FromServices] SignInManager<ApplicationUser> signInManager,
                 [FromForm] string provider) =>
             {
@@ -65,46 +69,72 @@ namespace OneStream.Backend.Components.Account
                     QueryString.Create("Action", ExternalLogins.LinkLoginCallbackAction));
 
                 var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, signInManager.UserManager.GetUserId(context.User));
+
                 return TypedResults.Challenge(properties, [provider]);
             });
 
             var loggerFactory = endpoints.ServiceProvider.GetRequiredService<ILoggerFactory>();
             var downloadLogger = loggerFactory.CreateLogger("DownloadPersonalData");
 
-            manageGroup.MapPost("/DownloadPersonalData", async (
-                HttpContext context,
+            manageGroup.MapPost("/DownloadPersonalData", async (HttpContext context,
                 [FromServices] UserManager<ApplicationUser> userManager,
                 [FromServices] AuthenticationStateProvider authenticationStateProvider) =>
             {
                 var user = await userManager.GetUserAsync(context.User);
                 if (user is null)
-                {
                     return Results.NotFound($"Unable to load user with ID '{userManager.GetUserId(context.User)}'.");
-                }
 
                 var userId = await userManager.GetUserIdAsync(user);
                 downloadLogger.LogInformation("User with ID '{UserId}' asked for their personal data.", userId);
 
                 // Only include personal data for download
                 var personalData = new Dictionary<string, string>();
-                var personalDataProps = typeof(ApplicationUser).GetProperties().Where(
-                    prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
+                var personalDataProps = typeof(ApplicationUser).GetProperties()
+                    .Where(
+                        prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
+
                 foreach (var p in personalDataProps)
-                {
                     personalData.Add(p.Name, p.GetValue(user)?.ToString() ?? "null");
-                }
 
                 var logins = await userManager.GetLoginsAsync(user);
                 foreach (var l in logins)
-                {
                     personalData.Add($"{l.LoginProvider} external login provider key", l.ProviderKey);
-                }
 
                 personalData.Add("Authenticator Key", (await userManager.GetAuthenticatorKeyAsync(user))!);
                 var fileBytes = JsonSerializer.SerializeToUtf8Bytes(personalData);
 
                 context.Response.Headers.TryAdd("Content-Disposition", "attachment; filename=PersonalData.json");
+
                 return TypedResults.File(fileBytes, contentType: "application/json", fileDownloadName: "PersonalData.json");
+            });
+
+            accountGroup.MapGet("token", async (HttpContext context,
+                [FromServices] IConfiguration configuration,
+                [FromServices] UserManager<ApplicationUser> userManager) =>
+            {
+                var user = await userManager.GetUserAsync(context.User);
+
+                if (user is null)
+                    return Results.NotFound($"Unable to load user with ID '{userManager.GetUserId(context.User)}'.");
+
+                var claims = new List<Claim>
+                {
+                    new(ClaimTypes.NameIdentifier, user.Id),
+                    new(ClaimTypes.Name, user.UserName),
+                };
+
+                var jwtToken = new JwtSecurityToken(
+                    claims: claims,
+                    notBefore: DateTime.UtcNow,
+                    expires: DateTime.UtcNow.AddDays(30),
+                    signingCredentials: new SigningCredentials(
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(configuration["Authentication:JWT_Secret"])
+                        ),
+                        SecurityAlgorithms.HmacSha256Signature)
+                );
+
+                return TypedResults.Ok(new JwtSecurityTokenHandler().WriteToken(jwtToken));
             });
 
             return accountGroup;

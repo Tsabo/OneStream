@@ -1,6 +1,6 @@
-namespace OneStream.Api
+namespace OneStream.Api.DataObjects
 {
-    public class WeatherForecast
+    public class WeatherForecastDto
     {
         public DateOnly Date { get; set; }
 

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OneStream.Backend.Data
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+    public class IdentityDbContext(DbContextOptions<IdentityDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
     }
 }

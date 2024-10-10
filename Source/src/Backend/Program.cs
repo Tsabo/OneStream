@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using OneStream.Backend.Components;
 using OneStream.Backend.Components.Account;
 using OneStream.Backend.Data;
@@ -12,9 +12,15 @@ namespace OneStream.Backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.AddSqlServerDbContext<IdentityDbContext>("OneStream");
             builder.AddServiceDefaults();
 
             // Add services to the container.
+
+            // Add MudBlazor services
+            builder.Services.AddMudServices();
+            
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents()
                 .AddInteractiveWebAssemblyComponents();
@@ -31,19 +37,16 @@ namespace OneStream.Backend
                 })
                 .AddIdentityCookies();
 
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddEntityFrameworkStores<IdentityDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
-            builder.Services.AddAntiforgery();
-
             builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+            builder.Services.AddScoped<AuthenticationStateProvider, PersistingAuthenticationStateProvider>();
 
             var app = builder.Build();
 
