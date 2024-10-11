@@ -66,12 +66,22 @@ else
     private async Task Refresh()
     {
         var state = await AuthenticationState;
-
         var bearer = state.User.FindFirst(p => p.Type == "Bearer")?.Value;
 
-        _people = await "https://localhost:7057/People"
-            .WithOAuthBearerToken(bearer)
-            .GetJsonAsync<Person[]>();
+        try
+        {
+            _people = await "https://localhost:7057/People"
+                .WithOAuthBearerToken(bearer)
+                .GetJsonAsync<Person[]>();
+        }
+        catch (FlurlHttpException ex) when (ex.Call.Response.StatusCode == (int)System.Net.HttpStatusCode.Unauthorized)
+        {
+            Snackbar.Add("Unauthorized", Severity.Error);
+        }
+        catch (FlurlHttpException ex) when (ex.Call.Response.StatusCode == (int)System.Net.HttpStatusCode.BadRequest)
+        {
+            Snackbar.Add("Failed to retrieve people", Severity.Error);
+        }
 
         StateHasChanged();
     }
@@ -104,19 +114,31 @@ else
 
         var state = await AuthenticationState;
         var bearer = state.User.FindFirst(c => c.Type == "Bearer")?.Value;
-        var result = await "https://localhost:7057/People"
-            .AppendPathSegment(id)
-            .WithOAuthBearerToken(bearer)
-            .DeleteAsync()
-            .ReceiveJson<bool>();
 
-        if (result)
+        try
         {
-            Snackbar.Add("Person Deleted", Severity.Success);
-            await Refresh();
+            var result = await "https://localhost:7057/People"
+                .AppendPathSegment(id)
+                .WithOAuthBearerToken(bearer)
+                .DeleteAsync()
+                .ReceiveJson<bool>();
+
+            if (result)
+            {
+                Snackbar.Add("Person Deleted", Severity.Success);
+                await Refresh();
+            }
+            else
+                Snackbar.Add("Failed to delete person", Severity.Error);
         }
-        else
+        catch (FlurlHttpException ex) when (ex.Call.Response.StatusCode == (int)System.Net.HttpStatusCode.Unauthorized)
+        {
+            Snackbar.Add("Unauthorized", Severity.Error);
+        }
+        catch (FlurlHttpException ex) when (ex.Call.Response.StatusCode == (int)System.Net.HttpStatusCode.BadRequest)
+        {
             Snackbar.Add("Failed to delete person", Severity.Error);
+        }
     }
 
 }

@@ -59,22 +59,32 @@
         try
         {
             var state = await AuthenticationState;
-
             var bearer = state.User.FindFirst(p => p.Type == "Bearer")?.Value;
 
-            var result = await "https://localhost:7057/People"
-                .AppendPathSegment(Person.Id)
-                .WithOAuthBearerToken(bearer)
-                .PutJsonAsync(_model)
-                .ReceiveJson<bool>();
-
-            if (result)
+            try
             {
-                Snackbar.Add("Person Updated", Severity.Success);
-                MudDialog.Close(DialogResult.Ok(_model));
+                var result = await "https://localhost:7057/People"
+                    .AppendPathSegment(Person.Id)
+                    .WithOAuthBearerToken(bearer)
+                    .PutJsonAsync(_model)
+                    .ReceiveJson<bool>();
+
+                if (result)
+                {
+                    Snackbar.Add("Person Updated", Severity.Success);
+                    MudDialog.Close(DialogResult.Ok(_model));
+                }
+                else
+                    Snackbar.Add("Unable to update Person", Severity.Warning);
             }
-            else
-                Snackbar.Add("Unable to update Person", Severity.Warning);
+            catch (FlurlHttpException ex) when (ex.Call.Response.StatusCode == (int)System.Net.HttpStatusCode.Unauthorized)
+            {
+                Snackbar.Add("Unauthorized", Severity.Error);
+            }
+            catch (FlurlHttpException ex) when (ex.Call.Response.StatusCode == (int)System.Net.HttpStatusCode.BadRequest)
+            {
+                Snackbar.Add("Failed to update person", Severity.Error);
+            }
         }
         finally
         {

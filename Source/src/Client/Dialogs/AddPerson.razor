@@ -48,15 +48,25 @@
         try
         {
             var state = await AuthenticationState;
-
             var bearer = state.User.FindFirst(p => p.Type == "Bearer")?.Value;
 
-            var result = await "https://localhost:7057/People"
-                .WithOAuthBearerToken(bearer)
-                .PostJsonAsync(Person);
+            try
+            {
+                var result = await "https://localhost:7057/People"
+                    .WithOAuthBearerToken(bearer)
+                    .PostJsonAsync(Person);
 
-            Snackbar.Add("Person Added", Severity.Success);
-            MudDialog.Close(DialogResult.Ok(result));
+                Snackbar.Add("Person Added", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(result));
+            }
+            catch (FlurlHttpException ex) when (ex.Call.Response.StatusCode == (int)System.Net.HttpStatusCode.Unauthorized)
+            {
+                Snackbar.Add("Unauthorized", Severity.Error);
+            }
+            catch (FlurlHttpException ex) when (ex.Call.Response.StatusCode == (int)System.Net.HttpStatusCode.BadRequest)
+            {
+                Snackbar.Add("Failed to add person", Severity.Error);
+            }
         }
         finally
         {

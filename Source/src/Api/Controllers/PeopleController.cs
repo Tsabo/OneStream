@@ -29,7 +29,7 @@ namespace OneStream.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(400, ex.Message);
             }
         }
 
@@ -49,11 +49,11 @@ namespace OneStream.Api.Controllers
                 var result = await peopleRepo.AddPersonAsync(request);
                 return CreatedAtRoute("GetPeople", new { id = result.Id }, result);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogError(e, "Error adding person.");
+                _logger.LogError(ex, "Error adding person.");
 
-                return BadRequest(e);
+                return StatusCode(400, ex.Message);
             }
         }
 
@@ -72,7 +72,7 @@ namespace OneStream.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(400, ex.Message);
             }
         }
 
@@ -96,7 +96,7 @@ namespace OneStream.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(400, ex.Message);
             }
         }
     }
