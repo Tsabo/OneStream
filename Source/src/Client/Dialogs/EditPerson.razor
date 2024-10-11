@@ -1,0 +1,69 @@
+@using Flurl
+@using Flurl.Http
+@using OneStream.Client.DataObjects
+
+@inject ISnackbar Snackbar
+
+<EditForm Model="@Person" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator/>
+
+    <MudDialog>
+        <TitleContent>
+            <MudText Typo="Typo.h6">
+                <MudIcon Icon="@Icons.Material.Filled.Person" Class="mr-3 mb-n1" />
+                Edit Person
+            </MudText>
+        </TitleContent>
+        <DialogContent>
+            <MudTextField @bind-Value="@Person.Name" For="() => Person.Name" Label="Name" />
+            <MudTextField @bind-Value="@Person.Email" For="() => Person.Email" Label="Email" />
+
+            <MudOverlay Visible="_busy" DarkBackground="true" Absolute="true">
+                <MudProgressCircular Color="Color.Secondary" Indeterminate="true"/>
+            </MudOverlay>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Disabled="_busy" Color="Color.Success" ButtonType="ButtonType.Submit">Save</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    [Parameter]
+    public Person Person { get; set; }
+
+    private bool _busy;
+
+    private void Cancel() => MudDialog.Cancel();
+    
+    private async Task OnValidSubmit(EditContext context)
+    {
+        _busy = true;
+        try
+        {
+            var state = await AuthenticationState;
+
+            var bearer = state.User.FindFirst(p => p.Type == "Bearer")?.Value;
+
+            var result = await "https://localhost:7057/People"
+                .AppendPathSegment(Person.Id)
+                .WithOAuthBearerToken(bearer)
+                .PutJsonAsync(Person);
+
+            Snackbar.Add("Person Updated", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(result));
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

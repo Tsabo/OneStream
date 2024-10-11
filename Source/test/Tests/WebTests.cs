@@ -1,6 +1,13 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using OneStream.Api.Controllers;
+using OneStream.Api.Data;
+using OneStream.Api.Services.Abstractions;
+using System.Reflection.Metadata;
+using OneStream.Api.DataObjects;
+using Microsoft.AspNetCore.Mvc;
 
 namespace OneStream.Tests
 {
@@ -48,6 +55,100 @@ namespace OneStream.Tests
                 p => Assert.True(range.Contains(p.TemperatureC)),
                 p => Assert.True(range.Contains(p.TemperatureC)),
                 p => Assert.True(range.Contains(p.TemperatureC))
+            );
+        }
+
+        [Fact]
+        public async Task DeletePerson()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+
+            var logger = new Logger<PeopleController>(new NullLoggerFactory());
+
+            var repository = new Mock<IPeopleRepo>();
+            repository
+                .Setup(p => p.DeletePersonAsync(id))
+                .ReturnsAsync(true);
+            
+            var controller = new PeopleController(logger, repository.Object);
+
+            // Act
+            var result = await controller.DeletePerson(id);
+
+            Assert.IsType<OkObjectResult>(result);
+
+            if (result is not OkObjectResult { Value: bool deleted })
+                return;
+
+            Assert.True(deleted);
+        }
+
+        [Fact]
+        public async Task UpdatePerson()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+
+            var logger = new Logger<PeopleController>(new NullLoggerFactory());
+
+            var repository = new Mock<IPeopleRepo>();
+            repository
+                .Setup(p => p.UpdatePersonAsync(id, new PersonDto { Id = id, Name = "Test 1", Email = "test@test.com" }))
+                .ReturnsAsync(true);
+
+            var controller = new PeopleController(logger, repository.Object);
+
+            // Act
+            var result = await controller.UpdatePerson(id, new PersonDto { Id = id, Name = "Test 2", Email = "test2@test.com" });
+
+            Assert.IsType<OkObjectResult>(result);
+
+            if (result is not OkObjectResult { Value: bool updated })
+                return;
+
+            Assert.True(updated);
+        }
+
+        [Fact]
+        public async Task GetPersons()
+        {
+            // Arrange
+            var logger = new Logger<PeopleController>(new NullLoggerFactory());
+
+            var repository = new Mock<IPeopleRepo>();
+            repository
+                .Setup(p => p.GetPeopleAsync())
+                .ReturnsAsync([
+                    new PersonDto { Id = Guid.NewGuid(), Name = "Test 1", Email = "test1@test.com" },
+                    new PersonDto { Id = Guid.NewGuid(), Name = "Test 2", Email = "test2@test.com" }
+                ]);
+
+            var controller = new PeopleController(logger, repository.Object);
+
+            // Act
+            var result = await controller.GetPeople();
+
+            // Assert
+
+            repository.Verify(p => p.GetPeopleAsync());
+
+            Assert.IsType<OkObjectResult>(result);
+
+            if (result is not OkObjectResult { Value: PersonDto[] persons })
+                return;
+            
+            Assert.Collection(persons,
+                p =>
+                {
+                    Assert.IsType<PersonDto>(p);
+                    Assert.Equal("Test 1", p.Name);
+                },
+                p =>
+                {
+                    Assert.IsType<PersonDto>(p);
+                    Assert.Equal("Test 2", p.Name);
+                }
             );
         }
     }

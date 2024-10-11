@@ -21,10 +21,7 @@ namespace OneStream.Backend.Components.Account
         private readonly IdentityOptions _options;
         private readonly IConfiguration _configuration;
 
-        public PersistingAuthenticationStateProvider(
-            PersistentComponentState persistentComponentState,
-            IOptions<IdentityOptions> optionsAccessor,
-            IConfiguration configuration)
+        public PersistingAuthenticationStateProvider(PersistentComponentState persistentComponentState, IOptions<IdentityOptions> optionsAccessor, IConfiguration configuration)
         {
             _options = optionsAccessor.Value;
             _state = persistentComponentState;
@@ -47,9 +44,10 @@ namespace OneStream.Backend.Components.Account
                 var email = principal.FindFirst(_options.ClaimsIdentity.EmailClaimType)?.Value;
 
                 var jwtToken = new JwtSecurityToken(
-                    claims: new List<Claim> {
-                    new(ClaimTypes.NameIdentifier, userId),
-                    new(ClaimTypes.Name, email),
+                    claims: new List<Claim>
+                    {
+                        new(ClaimTypes.NameIdentifier, userId),
+                        new(ClaimTypes.Name, email),
                     },
                     notBefore: DateTime.UtcNow,
                     expires: DateTime.UtcNow.AddMinutes(30),

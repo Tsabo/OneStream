@@ -28,12 +28,7 @@ namespace OneStream.Backend.Components.Account
 
         private Task<AuthenticationState>? _authenticationStateTask;
 
-        public PersistingRevalidatingAuthenticationStateProvider(
-            ILoggerFactory loggerFactory,
-            IServiceScopeFactory serviceScopeFactory,
-            PersistentComponentState persistentComponentState,
-            IOptions<IdentityOptions> optionsAccessor,
-            IConfiguration configuration)
+        public PersistingRevalidatingAuthenticationStateProvider(ILoggerFactory loggerFactory, IServiceScopeFactory serviceScopeFactory, PersistentComponentState persistentComponentState, IOptions<IdentityOptions> optionsAccessor, IConfiguration configuration)
             : base(loggerFactory)
         {
             _scopeFactory = serviceScopeFactory;

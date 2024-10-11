@@ -1,7 +1,127 @@
 ﻿@page "/people"
 
-<h3>People</h3>
+@using Flurl
+@using Flurl.Http
+@using Microsoft.AspNetCore.Authorization
+@using OneStream.Client.DataObjects
+
+@attribute [Authorize]
+
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>People</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">People</MudText>
+
+@if (_people == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        <MudItem md="12">
+            <MudDataGrid Items="_people" Hover="true" Elevation="0">
+                <Columns>
+                    <PropertyColumn Property="p => p.Name" />
+                    <PropertyColumn Property="p => p.Email" />
+                    <TemplateColumn CellClass="d-flex justify-end">
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="() => EditPerson(context.Item)" />
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="() => DeletePerson(context.Item.Id)" />
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new[] { 50, 100 }"/>
+                </PagerContent>
+            </MudDataGrid>
+        </MudItem>
+        <MudItem md="4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ShowAddPersonDialog">Add Person</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="Refresh">Refresh</MudButton>
+        </MudItem>
+    </MudGrid>
+}
 
 @code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    private Person[]? _people;
+
+    protected override Task OnInitializedAsync() => Refresh();
+
+    private async Task ShowAddPersonDialog()
+    {
+        var dialog = await DialogService.ShowAsync<Dialogs.AddPerson>("Add Person");
+        var result = await dialog.Result;
+
+        if (result?.Canceled != true)
+            await Refresh();
+    }
+
+    private async Task Refresh()
+    {
+        var state = await AuthenticationState;
+
+        var bearer = state.User.FindFirst(p => p.Type == "Bearer")?.Value;
+
+        _people = await "https://localhost:7057/People"
+            .WithOAuthBearerToken(bearer)
+            .GetJsonAsync<Person[]>();
+
+        StateHasChanged();
+    }
+
+    private async Task EditPerson(Person person)
+    {
+        var copy = new Person
+        {
+            Id = person.Id,
+            Name = person.Name,
+            Email = person.Email
+        };
+
+        var parameters = new DialogParameters<Dialogs.EditPerson> { { p => p.Person, copy } };
+        var dialog = await DialogService.ShowAsync<Dialogs.EditPerson>("Edit Person", parameters);
+
+        var result = await dialog.Result;
+
+        if (result?.Canceled != true)
+        {
+            person.Name = copy.Name;
+            person.Email = copy.Email;
+        }
+    }
+
+    private async Task DeletePerson(Guid id)
+    {
+        var messageBox = await DialogService.ShowMessageBox(
+            "Warning",
+            "Deleting can not be undone!",
+            yesText: "Delete!", cancelText: "Cancel");
+
+        if (messageBox == null)
+            return;
+
+        var state = await AuthenticationState;
+        var bearer = state.User.FindFirst(c => c.Type == "Bearer")?.Value;
+        var result = await "https://localhost:7057/People"
+            .AppendPathSegment(id)
+            .WithOAuthBearerToken(bearer)
+            .DeleteAsync()
+            .ReceiveJson<bool>();
+
+        if (result)
+        {
+            Snackbar.Add("Person Deleted", Severity.Success);
+            await Refresh();
+        }
+        else
+            Snackbar.Add("Failed to delete person", Severity.Error);
+    }
 
 }

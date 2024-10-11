@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace OneStream.Api.DataObjects
+namespace OneStream.Client.DataObjects
 {
-    public class PersonDto
+    public class Person
     {
         public Guid Id { get; set; } = Guid.Empty;
 
