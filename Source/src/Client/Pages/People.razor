@@ -78,22 +78,17 @@ else
 
     private async Task EditPerson(Person person)
     {
-        var copy = new Person
-        {
-            Id = person.Id,
-            Name = person.Name,
-            Email = person.Email
-        };
-
-        var parameters = new DialogParameters<Dialogs.EditPerson> { { p => p.Person, copy } };
+        var parameters = new DialogParameters<Dialogs.EditPerson> { { p => p.Person, person } };
         var dialog = await DialogService.ShowAsync<Dialogs.EditPerson>("Edit Person", parameters);
 
         var result = await dialog.Result;
 
-        if (result?.Canceled != true)
+        if (result?.Canceled != true && result?.Data is EditPerson updated)
         {
-            person.Name = copy.Name;
-            person.Email = copy.Email;
+            if (!string.IsNullOrEmpty(updated.Name))
+                person.Name = updated.Name;
+            if (!string.IsNullOrEmpty(updated.Email))
+                person.Email = updated.Email;
         }
     }
 

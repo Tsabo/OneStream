@@ -15,6 +15,10 @@ namespace OneStream.Api.Controllers
     {
         private readonly ILogger _logger = logger;
 
+        /// <summary>
+        /// Retrieve people that have been enrolled.
+        /// </summary>
+        /// <returns>An array of <see cref="PersonDto">PersonDto[]</see></returns>
         [HttpGet(Name = "GetPeople")]
         public async Task<IActionResult> GetPeople()
         {
@@ -29,6 +33,11 @@ namespace OneStream.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Add a person to the list of people.
+        /// </summary>
+        /// <param name="request">The person to add</param>
+        /// <returns>Returns a <see cref="CreatedAtRouteResult"/> with the <see cref="PersonDto">PersonDto</see> object if successful.</returns>
         [HttpPost(Name = "AddPerson")]
         public async Task<IActionResult> AddPerson([FromBody] PersonDto request)
         {
@@ -48,6 +57,11 @@ namespace OneStream.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete a person from the list of people.
+        /// </summary>
+        /// <param name="id">The unique id of the person to remove.</param>
+        /// <returns>Returns true if successful, false if not.</returns>
         [HttpDelete("{id}", Name = "DeletePerson")]
         public async Task<IActionResult> DeletePerson(Guid id)
         {
@@ -62,8 +76,14 @@ namespace OneStream.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Update a person in the list of people.
+        /// </summary>
+        /// <param name="id">The unique id of the person to remove.</param>
+        /// <param name="request">The <see cref="EditPersonDto">PersonDto</see> with the parameters to change.</param>
+        /// <returns>Returns true if successful, false if not.</returns>
         [HttpPut("{id}", Name = "UpdatePerson")]
-        public async Task<IActionResult> UpdatePerson(Guid id, [FromBody] PersonDto request)
+        public async Task<IActionResult> UpdatePerson(Guid id, [FromBody] EditPersonDto request)
         {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);

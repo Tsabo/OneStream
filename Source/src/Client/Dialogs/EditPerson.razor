@@ -4,7 +4,7 @@
 
 @inject ISnackbar Snackbar
 
-<EditForm Model="@Person" OnValidSubmit="OnValidSubmit">
+<EditForm Model="@_model" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator/>
 
     <MudDialog>
@@ -15,8 +15,8 @@
             </MudText>
         </TitleContent>
         <DialogContent>
-            <MudTextField @bind-Value="@Person.Name" For="() => Person.Name" Label="Name" />
-            <MudTextField @bind-Value="@Person.Email" For="() => Person.Email" Label="Email" />
+            <MudTextField @bind-Value="@_model.Name" For="() => _model.Name" Label="Name" />
+            <MudTextField @bind-Value="@_model.Email" For="() => _model.Email" Label="Email" />
 
             <MudOverlay Visible="_busy" DarkBackground="true" Absolute="true">
                 <MudProgressCircular Color="Color.Secondary" Indeterminate="true"/>
@@ -39,11 +39,20 @@
 
     [Parameter]
     public Person Person { get; set; }
+    
+    private DataObjects.EditPerson _model { get; set; }
 
     private bool _busy;
 
     private void Cancel() => MudDialog.Cancel();
-    
+
+    protected override void OnInitialized() =>
+        _model = new DataObjects.EditPerson
+        {
+            Name = Person.Name,
+            Email = Person.Email
+        };
+
     private async Task OnValidSubmit(EditContext context)
     {
         _busy = true;
@@ -56,10 +65,16 @@
             var result = await "https://localhost:7057/People"
                 .AppendPathSegment(Person.Id)
                 .WithOAuthBearerToken(bearer)
-                .PutJsonAsync(Person);
+                .PutJsonAsync(_model)
+                .ReceiveJson<bool>();
 
-            Snackbar.Add("Person Updated", Severity.Success);
-            MudDialog.Close(DialogResult.Ok(result));
+            if (result)
+            {
+                Snackbar.Add("Person Updated", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(_model));
+            }
+            else
+                Snackbar.Add("Unable to update Person", Severity.Warning);
         }
         finally
         {

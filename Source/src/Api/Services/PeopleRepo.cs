@@ -5,8 +5,13 @@ using OneStream.Api.Services.Abstractions;
 
 namespace OneStream.Api.Services
 {
+    /// <summary>
+    /// Repository for the people.
+    /// </summary>
+    /// <param name="dbDbContext"></param>
     public class PeopleRepo(ApplicationDbContext dbDbContext) : IPeopleRepo
     {
+        /// <inheritdoc />
         public async Task<PersonDto[]> GetPeopleAsync()
         {
             var result = await dbDbContext.People
@@ -21,6 +26,7 @@ namespace OneStream.Api.Services
             return result;
         }
 
+        /// <inheritdoc />
         public async Task<PersonDto> AddPersonAsync(PersonDto person)
         {
             if (person.Id == Guid.Empty)
@@ -38,6 +44,7 @@ namespace OneStream.Api.Services
             return person;
         }
 
+        /// <inheritdoc />
         public async Task<bool> DeletePersonAsync(Guid id)
         {
             if (id == Guid.Empty)
@@ -54,7 +61,8 @@ namespace OneStream.Api.Services
             return true;
         }
 
-        public async Task<bool> UpdatePersonAsync(Guid id, PersonDto person)
+        /// <inheritdoc />
+        public async Task<bool> UpdatePersonAsync(Guid id, EditPersonDto person)
         {
             if (id == Guid.Empty)
                 return false;
@@ -63,8 +71,10 @@ namespace OneStream.Api.Services
             if (found == null)
                 return false;
 
-            found.Name = person.Name;
-            found.Email = person.Email;
+            if (!string.IsNullOrEmpty(person.Name))
+                found.Name = person.Name;
+            if (!string.IsNullOrEmpty(person.Email))
+                found.Email = person.Email;
 
             await dbDbContext.SaveChangesAsync();
 
