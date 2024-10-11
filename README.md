@@ -2,7 +2,9 @@
 
 ![Simple CRUD Example](https://github.com/user-attachments/assets/4f20030c-20e3-4e51-87ff-10ef2b575765)
 
-![architecture](https://github.com/user-attachments/assets/888a58ed-99a0-40ba-a544-632ab2b000e8)
+# Architecture
+
+![architecture](https://github.com/user-attachments/assets/6f79d9ad-a7fb-4db0-b91d-c8a0dd6f4b39)
 
 ## Prerequisites 
 
