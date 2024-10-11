@@ -7,6 +7,8 @@
 
 @attribute [Authorize]
 
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 

@@ -6,6 +6,10 @@
 
 @attribute [Authorize]
 
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+@inject ISnackbar Snackbar
+
 <PageTitle>Weather</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Weather forecast</MudText>
@@ -35,6 +39,7 @@ else
         </PagerContent>
     </MudTable>
 }
+
 @code {
 
     [CascadingParameter]
@@ -45,11 +50,21 @@ else
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthenticationState;
-
         var bearer = state.User.FindFirst(c => c.Type == "Bearer")?.Value;
 
-        _forecasts = await "https://localhost:7057/WeatherForecast"
-            .WithOAuthBearerToken(bearer)
-            .GetJsonAsync<WeatherForecast[]>();
+        try
+        {
+            _forecasts = await "https://localhost:7057/WeatherForecast"
+                .WithOAuthBearerToken(bearer)
+                .GetJsonAsync<WeatherForecast[]>();
+        }
+        catch (FlurlHttpException ex) when (ex.Call.Response.StatusCode == (int)System.Net.HttpStatusCode.Unauthorized)
+        {
+            Snackbar.Add("Unauthorized", Severity.Error);
+        }
+        catch (FlurlHttpException ex) when (ex.Call.Response.StatusCode == (int)System.Net.HttpStatusCode.BadRequest)
+        {
+            Snackbar.Add("Failed to retrieve people", Severity.Error);
+        }
     }
 }
