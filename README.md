@@ -1,6 +1,8 @@
 # OneStream Candidate Assessment
 
-![architecture](https://github.com/user-attachments/assets/1320e782-2548-4dbc-96d4-100ab1a27a01)
+![Simple CRUD Example](https://github.com/user-attachments/assets/4f20030c-20e3-4e51-87ff-10ef2b575765)
+
+![architecture](https://github.com/user-attachments/assets/888a58ed-99a0-40ba-a544-632ab2b000e8)
 
 ## Prerequisites 
 
@@ -26,23 +28,19 @@ git clone https://github.com/Tsabo/OneStream.git
 ```shell
 cd ./OneStream
 ```
-3. Apple database migrations:
-```shell
-dotnet ef database update --project ./Source/src/Backend/
-```
-4. Ensure you have the latest Aspire and WebAssembly build tools installed:
+3. Ensure you have the latest Aspire and WebAssembly build tools installed:
 ```shell
 dotnet workload update
 ```
-5. To install the .NET Aspire and the WebAssembly build tools workload from the .NET CLI, use the dotnet workload install command:
+4. To install the .NET Aspire and the WebAssembly build tools workload from the .NET CLI, use the dotnet workload install command:
 ```shell
 dotnet workload install aspire wasm-tools
 ```
-6. Run the project
+5. Run the project
 ```shell
 dotnet run --project ./Source/src/AppHost
 ```
-7. Open a browser and navigate to https://localhost:7120/
+6. Open a browser and navigate to https://localhost:7120/
 
 ## .NET Aspire Dashboard
 
