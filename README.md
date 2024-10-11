@@ -1,6 +1,6 @@
 # OneStream Candidate Assessment
 
-![Simple CRUD Example](https://github.com/user-attachments/assets/4076dfb5-c7d9-4d72-aae0-b21a6e50c86e)
+![Simple CRUD Example](https://github.com/user-attachments/assets/4f20030c-20e3-4e51-87ff-10ef2b575765)
 
 ![architecture](https://github.com/user-attachments/assets/888a58ed-99a0-40ba-a544-632ab2b000e8)
 
