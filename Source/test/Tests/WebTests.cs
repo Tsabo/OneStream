@@ -1,13 +1,10 @@
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OneStream.Api.Controllers;
-using OneStream.Api.Data;
 using OneStream.Api.Services.Abstractions;
-using System.Reflection.Metadata;
 using OneStream.Api.DataObjects;
-using Microsoft.AspNetCore.Mvc;
 
 namespace OneStream.Tests
 {
@@ -68,7 +65,7 @@ namespace OneStream.Tests
 
             var repository = new Mock<IPeopleRepo>();
             repository
-                .Setup(p => p.DeletePersonAsync(id))
+                .Setup(p => p.DeletePersonAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(true);
             
             var controller = new PeopleController(logger, repository.Object);
@@ -76,6 +73,7 @@ namespace OneStream.Tests
             // Act
             var result = await controller.DeletePerson(id);
 
+            // Assert
             Assert.IsType<OkObjectResult>(result);
 
             if (result is not OkObjectResult { Value: bool deleted })
@@ -94,13 +92,18 @@ namespace OneStream.Tests
 
             var repository = new Mock<IPeopleRepo>();
             repository
-                .Setup(p => p.UpdatePersonAsync(id, new PersonDto { Id = id, Name = "Test 1", Email = "test@test.com" }))
+                .Setup(p => p.UpdatePersonAsync(It.IsAny<Guid>(), It.IsAny<EditPersonDto>()))
                 .ReturnsAsync(true);
 
             var controller = new PeopleController(logger, repository.Object);
 
+            var person = new EditPersonDto { Name = "Test 2", Email = "test2@test.com" };
+
             // Act
-            var result = await controller.UpdatePerson(id, new PersonDto { Id = id, Name = "Test 2", Email = "test2@test.com" });
+            var result = await controller.UpdatePerson(id, person);
+            
+            // Assert
+            repository.Verify(p => p.UpdatePersonAsync(id, person));
 
             Assert.IsType<OkObjectResult>(result);
 
